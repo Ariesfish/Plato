@@ -1,4 +1,4 @@
-package xyz.ariesfish.oio;
+package xyz.ariesfish;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -24,7 +24,7 @@ class Sender implements Runnable {
     }
 }
 
-public class OIOClient {
+public class Client {
     public static void main(String[] args) {
         new Thread(new Sender()).start();
     }
