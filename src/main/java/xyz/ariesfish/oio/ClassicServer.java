@@ -24,7 +24,7 @@ public class ClassicServer implements Runnable {
                 // 阻塞，直到收到客户端连接请求
                 Socket client = socket.accept();
                 // 为该客户端的连接单独开一个线程处理，也可以使用线程池
-                new Thread().start();
+                new Thread(new Handler(client)).start();
             } catch (IOException e) {
                 System.err.println("Failed to accept client socket.");
             }

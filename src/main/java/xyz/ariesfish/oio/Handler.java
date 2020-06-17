@@ -7,7 +7,7 @@ public class Handler implements Runnable {
     final static int MAX_INPUT = 1024;
     private Socket socket;
 
-    public Handler(Socket s) { socket = s;}
+    public Handler(Socket s) { socket = s; }
 
     @Override
     public void run() {
