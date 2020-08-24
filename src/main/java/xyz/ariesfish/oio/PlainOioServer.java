@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ClassicServer implements Runnable {
+public class PlainOioServer implements Runnable {
     private int port;
     private ServerSocket socket;
 
-    public ClassicServer(int port) {
+    public PlainOioServer(int port) {
         this.port = port;
         try {
             socket = new ServerSocket(port);
@@ -23,6 +23,7 @@ public class ClassicServer implements Runnable {
             try {
                 // 阻塞，直到收到客户端连接请求
                 Socket client = socket.accept();
+                System.out.println("Accepted connection from " + client);
                 // 为该客户端的连接单独开一个线程处理，也可以使用线程池
                 new Thread(new Handler(client)).start();
             } catch (IOException e) {

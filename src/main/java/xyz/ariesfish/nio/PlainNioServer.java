@@ -9,17 +9,17 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
-public class Reactor implements Runnable {
+public class PlainNioServer implements Runnable {
     final Selector selector;
     final ServerSocketChannel serverSocket;
 
-    public Reactor(int port) throws IOException {
+    public PlainNioServer(int port) throws IOException {
         selector = Selector.open();
         serverSocket = ServerSocketChannel.open();
         serverSocket.socket().bind(new InetSocketAddress(port));
         serverSocket.configureBlocking(false);
-        // 注册serverSocket和selector，监听ACCEPT事件, 绑定ACCEPT事件对应的处理单元Acceptor
-        serverSocket.register(selector, SelectionKey.OP_ACCEPT, new Acceptor());
+        // 注册serverSocket和selector，监听ACCEPT事件
+        SelectionKey sk = serverSocket.register(selector, SelectionKey.OP_ACCEPT);
     }
 
     public void run() {
@@ -33,6 +33,7 @@ public class Reactor implements Runnable {
                 while (it.hasNext()) {
                     // 将事件分发给对应的处理单元
                     dispatch(it.next());
+                    it.remove();
                 }
                 selected.clear();
             }
@@ -42,28 +43,13 @@ public class Reactor implements Runnable {
     }
 
     private void dispatch(SelectionKey key) {
-        // 获得已经绑定的处理单元, Acceptor或各种Handler
-        Runnable r = (Runnable) key.attachment();
-        if (r != null) {
-            // 执行处理单元
-            r.run();
-        }
-    }
-
-    class Acceptor implements Runnable {
-        @Override
-        public void run() {
-            try {
-                SocketChannel c = serverSocket.accept();
-                if (c != null) {
-                    // 以得到的socket，创建一个事件的处理单元
-                    new BasicHandler(selector, c);
-                    // 多线程的处理单元
-                    // new MultithreadedHandler(selector, c);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        // 分配Handler处理
+        try {
+            if (key.isAcceptable()) {
+                SocketChannel client = serverSocket.accept();
+                new BasicHandler(selector, client);
             }
+        } catch (IOException e) {
         }
     }
 }
